@@ -1,1 +1,0 @@
-CREATE	TABLE	users	(`uid`	INT(10)	UNSIGNED	NOT	NULL	AUTO_INCREMENT, `first_name`	VARCHAR(32)	NOT	NULL, `middle_name`	VARCHAR(32)	NOT	NULL, `last_name`	VARCHAR(32)	NOT	NULL, `username`	VARCHAR(128)	NOT	NULL, `email`	VARCHAR(128)	NULL, `password`	VARCHAR(128)	NULL,PRIMARY	KEY	(`user_id`),UNIQUE	INDEX	`username`(`username`))

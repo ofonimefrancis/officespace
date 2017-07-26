@@ -26,7 +26,7 @@ var database *sql.DB
 var err error
 
 func main() {
-	database, err = sql.Open("mysql", "root:glootian@/office_space")
+	database, err = sql.Open("mysql", "root:password@/database_name")
 	routes := mux.NewRouter()
 	routes.HandleFunc("/api/user/create", CreateUser).Methods("GET")
 	routes.HandleFunc("/api/user/read/{uid:\\d+}", GetUser).Methods("GET")
