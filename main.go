@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -27,7 +29,32 @@ type Users struct {
 }
 
 type CreateResponse struct {
-	Error string `json:"error"`
+	Error     string `json:"error"`
+	ErrorCode int    `json:"code"`
+}
+
+type ErrMsg struct {
+	ErrCode    int
+	StatusCode int
+	Msg        string
+}
+
+func ErrorMessages(err int64) ErrMsg {
+	var em = ErrMsg{}
+	errorMessage := ""
+	statusCode := 200
+	errorCode := 0
+
+	switch err {
+	case 1062:
+		errorMessage = "Duplicate entry"
+		errorCode = 10
+		statusCode = 409
+	}
+	em.ErrCode = errorCode
+	em.StatusCode = statusCode
+	em.Msg = errorMessage
+	return em
 }
 
 var database *sql.DB
@@ -97,9 +124,23 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 	sql := "INSERT	INTO	users	set	first_name='" + NewUser.FirstName + "', middle_name='" + NewUser.MiddleName + "',	last_name='" + NewUser.LastName + "',username='" + NewUser.UserName + "',email='" + NewUser.Email + "',password='" + NewUser.Password + "'"
 	q, err := database.Exec(sql)
 	if err != nil {
-		Response.Error = err.Error()
+		errorMessage, errorCode := dbErrorParse(err.Error())
+		fmt.Println(errorMessage)
+		error, httpCode, msg := ErrorMessages(errorCode)
+		Response.Error = msg
+		Resposne.ErrorCode = error
+		fmt.Println(httpCode)
 	}
 	fmt.Println(q)
 	createOutput, _ := json.Marshal(Response)
 	fmt.Fprintln(w, string(createOutput))
+}
+
+//Parser that splits a MySQL error string into its two components and return an integer error code
+func dbErrorParse(err string) (string, int64) {
+	Parts := strings.Split(err, ":")
+	errorMessage := Parts[1]
+	Code := strings.Split(Parts[0], "Error ")
+	errorCode, _ := strconv.ParseInt(Code[1], 10, 32)
+	return errorMessage, errorCode
 }
