@@ -26,6 +26,10 @@ type Users struct {
 	Users []User `json:"users"`
 }
 
+type CreateResponse struct {
+	Error string `json:"error"`
+}
+
 var database *sql.DB
 var err error
 
@@ -88,10 +92,14 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Something went wrong!")
 	}
+
+	Response := CreateResponse{}
 	sql := "INSERT	INTO	users	set	first_name='" + NewUser.FirstName + "', middle_name='" + NewUser.MiddleName + "',	last_name='" + NewUser.LastName + "',username='" + NewUser.UserName + "',email='" + NewUser.Email + "',password='" + NewUser.Password + "'"
 	q, err := database.Exec(sql)
 	if err != nil {
-		fmt.Println(err.Error())
+		Response.Error = err.Error()
 	}
 	fmt.Println(q)
+	createOutput, _ := json.Marshal(Response)
+	fmt.Fprintln(w, string(createOutput))
 }
