@@ -1,0 +1,7 @@
+/api/user     User
+/api/user/id  UserProfile
+
+
+
+
+r.HandleFunc("/api/users/{user_id:\d+}", UserProfile)
