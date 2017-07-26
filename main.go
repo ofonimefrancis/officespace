@@ -36,6 +36,7 @@ func main() {
 	}
 	database = db
 	routes := mux.NewRouter()
+	routes.HandleFunc("/api/users/{key:[A-Za-z0-9\\-]}", UserRetrieve)
 	routes.HandleFunc("/api/users", UserCreate).Methods("POST")
 	routes.HandleFunc("/api/users", UserRetrieve).Methods("GET")
 	http.Handle("/", routes)
@@ -44,10 +45,10 @@ func main() {
 
 func UserRetrieve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Pragma", "no-cache")
-
+	//variables := mux.Vars(r)
+	//key := variables["key"]
 	rows, _ := database.Query("select * from users LIMIT 10")
 	Response := Users{}
-
 	for rows.Next() {
 		user := User{}
 		rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.MiddleName, &user.Email, &user.UserName, &user.IsAdmin, &user.Password)
@@ -93,17 +94,4 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 	}
 	fmt.Println(q)
-}
-
-func initialTest() {
-	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		james := User{1, "Ofonime", "Francis", "Usoro", "Jiggaseige", "all4usoro@gmail.com", "#%@&@#(((@#)))", true}
-		output, err := json.Marshal(james)
-		if err != nil {
-			fmt.Println("Something went wrong")
-		}
-		fmt.Fprintf(w, string(output))
-	})
-
-	http.ListenAndServe(":4000", nil)
 }
