@@ -22,16 +22,39 @@ type User struct {
 	IsAdmin    bool   `json:"is_admin"`
 }
 
+type Users struct {
+	Users []User `json:"users"`
+}
+
 var database *sql.DB
 var err error
 
 func main() {
-	database, err = sql.Open("mysql", "root:password@/database_name")
+	db, err := sql.Open("mysql", "root:password@/database_name")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	database = db
 	routes := mux.NewRouter()
-	routes.HandleFunc("/api/user/create", CreateUser).Methods("GET")
-	routes.HandleFunc("/api/user/read/{uid:\\d+}", GetUser).Methods("GET")
+	routes.HandleFunc("/api/users", UserCreate).Methods("POST")
+	routes.HandleFunc("/api/users", UserRetrieve).Methods("GET")
 	http.Handle("/", routes)
 	http.ListenAndServe(":4000", nil)
+}
+
+func UserRetrieve(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Pragma", "no-cache")
+
+	rows, _ := database.Query("select * from users LIMIT 10")
+	Response := Users{}
+
+	for rows.Next() {
+		user := User{}
+		rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.MiddleName, &user.Email, &user.UserName, &user.IsAdmin, &user.Password)
+		Response.Users = append(Response.Users, user)
+	}
+	output, _ := json.Marshal(Response)
+	fmt.Fprintln(w, string(output))
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +74,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+func UserCreate(w http.ResponseWriter, r *http.Request) {
 	NewUser := User{}
 	NewUser.FirstName = r.FormValue("first_name")
 	NewUser.MiddleName = r.FormValue("middle_name")
