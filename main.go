@@ -126,10 +126,9 @@ func UserCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errorMessage, errorCode := dbErrorParse(err.Error())
 		fmt.Println(errorMessage)
-		error, httpCode, msg := ErrorMessages(errorCode)
-		Response.Error = msg
-		Resposne.ErrorCode = error
-		fmt.Println(httpCode)
+		errMsg := ErrorMessages(errorCode)
+		Response.Error = errMsg.Msg
+		Response.ErrorCode = errMsg.ErrCode
 	}
 	fmt.Println(q)
 	createOutput, _ := json.Marshal(Response)
