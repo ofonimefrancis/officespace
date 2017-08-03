@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/opiumated/officeSpace/models"
 )
 
 type (
-	UserController struct{}
+	UserController struct {
+		session *mgo.Session
+	}
 )
 
 func checkError(err error) {
@@ -22,37 +26,39 @@ func checkError(err error) {
 	}
 }
 
-func NewUserController() *UserController {
-	return &UserController{}
+func NewUserController(session *mgo.Session) *UserController {
+	return &UserController{session}
 }
 
 //Retrieve an individual user's resource
 func (userController UserController) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	user := models.User{
-		ID:          p.ByName("user_id"),
-		FirtName:    "Ofonime",
-		MiddleName:  "Francis",
-		LastName:    "Usoro",
-		Username:    "Baba",
-		Email:       "baba.usoro@gloo.ng",
-		Password:    "jiggaeige#01",
-		DateCreated: time.Now(),
-		DateUpdated: time.Now(),
+	id := p.ByName("id")
+
+	if !bson.IsObjectIdHex(id) {
+		w.WriteHeader(404)
+		return
 	}
 
-	userJSON, err := json.Marshal(user)
-	checkError(err)
-	w.Header().Set("Content-Type", "application/json; charset=utf8")
+	oid := bson.ObjectIdHex(id)
+
+	u := models.User{}
+
+	if err := userController.session.DB("office_space").C("users").FindId(oid).One(&u); err != nil {
+		w.WriteHeader(404)
+		return
+	}
+	uj, _ := json.Marshal(u)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	fmt.Fprintf(w, "%s", userJSON)
+	fmt.Fprintf(w, "%s", uj)
 }
 
-// CreateUser creates a new user resource
 func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	u := models.User{}
 	json.NewDecoder(r.Body).Decode(&u)
 
-	u.ID = "foo" //this will be set by the user
+	u.ID = bson.NewObjectId()
+	uc.session.DB("office_space").C("users").Insert(u)
 	uj, err := json.Marshal(u)
 	checkError(err)
 	w.Header().Set("Content-Type", "application/json; charset=utf8")
@@ -60,8 +66,6 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, p ht
 	fmt.Fprintf(w, "%s", uj)
 }
 
-// RemoveUser removes an existing user resource
 func (uc UserController) RemoveUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	// TODO: only write status for now
 	w.WriteHeader(200)
 }
