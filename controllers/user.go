@@ -61,11 +61,21 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, p ht
 	uc.session.DB("office_space").C("users").Insert(u)
 	uj, err := json.Marshal(u)
 	checkError(err)
-	w.Header().Set("Content-Type", "application/json; charset=utf8")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 	fmt.Fprintf(w, "%s", uj)
 }
 
 func (uc UserController) RemoveUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	if !bson.IsObjectIdHex(id) {
+		w.WriteHeader(404)
+		return
+	}
+	oid := bson.ObjectIdHex(id)
+	if err := uc.session.DB("go_rest_tutorial").C("users").RemoveId(oid); err != nil {
+		w.WriteHeader(404)
+		return
+	}
 	w.WriteHeader(200)
 }

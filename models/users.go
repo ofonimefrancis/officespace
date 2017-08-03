@@ -14,7 +14,6 @@ type (
 		MiddleName  string        `json:"middle_name" bson: "middle_name"`
 		LastName    string        `json:"last_name" bson: "last_name"`
 		Username    string        `json:"username" bson: "username"`
-		Password    string        `json:"password" bson: "password"`
 		Email       string        `json:"email" bson: "email"`
 		IsAdmin     bool          `json:"is_admin" bson: "is_admin"`
 		DateCreated time.Time     `json:"date_created" bson: "date_created"`
