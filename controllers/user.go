@@ -42,7 +42,7 @@ func (userController UserController) GetUser(w http.ResponseWriter, r *http.Requ
 
 	userJSON, err := json.Marshal(user)
 	checkError(err)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf8")
 	w.WriteHeader(200)
 	fmt.Fprintf(w, "%s", userJSON)
 }
@@ -55,7 +55,7 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, p ht
 	u.ID = "foo" //this will be set by the user
 	uj, err := json.Marshal(u)
 	checkError(err)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf8")
 	w.WriteHeader(201)
 	fmt.Fprintf(w, "%s", uj)
 }
