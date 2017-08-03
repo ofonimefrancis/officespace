@@ -35,7 +35,7 @@ func (userController UserController) GetUser(w http.ResponseWriter, r *http.Requ
 		LastName:    "Usoro",
 		Username:    "Baba",
 		Email:       "baba.usoro@gloo.ng",
-		Password:    "Phoenix#01",
+		Password:    "jiggaeige#01",
 		DateCreated: time.Now(),
 		DateUpdated: time.Now(),
 	}
