@@ -30,7 +30,7 @@ func NewUserController(session *mgo.Session) *UserController {
 	return &UserController{session}
 }
 
-//Retrieve an individual user's resource
+//GetUSer Retrieve an individual user's resource
 func (userController UserController) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	id := p.ByName("id")
 
@@ -67,15 +67,26 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, p ht
 }
 
 func (uc UserController) RemoveUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	id := p.ByName("id")
+	id := p.ByName("user_id")
 	if !bson.IsObjectIdHex(id) {
 		w.WriteHeader(404)
 		return
 	}
 	oid := bson.ObjectIdHex(id)
-	if err := uc.session.DB("go_rest_tutorial").C("users").RemoveId(oid); err != nil {
+	if err := uc.session.DB("office_space").C("users").RemoveId(oid); err != nil {
 		w.WriteHeader(404)
 		return
 	}
 	w.WriteHeader(200)
+}
+
+//GEtters
+func (uc UserController) GetEmail(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("user_id")
+	if !bson.IsObjectIdHex(id) {
+		w.WriteHeader(404)
+		return
+	}
+	objectId := bson.ObjectIdHex(id)
+	//if err := uc.session.DB("office_space").C("users").Find()
 }
